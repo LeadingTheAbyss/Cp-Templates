@@ -1,4 +1,5 @@
-long long mod_pow(long long a, long long b, long long mod = 1e9 + 7) {
+long long mod = 1e9 + 7;
+long long mod_pow(long long a, long long b) {
     long long res = 1;
     while (b) {
         if (b & 1) res = (res * a) % mod;
@@ -8,22 +9,22 @@ long long mod_pow(long long a, long long b, long long mod = 1e9 + 7) {
     return res;
 }
 
-long long mod_inv(long long a, long long mod = 1e9 + 7) {
-    return mod_pow(a, mod - 2, m);
+long long mod_inv(long long a) {
+    return mod_pow(a, mod - 2);
 }
 
-long long mod_add(long long a, long long b, long long mod = 1e9 + 7) {
+long long mod_add(long long a, long long b) {
     return ((a % mod + b % mod) % mod + mod) % mod;
 }
 
-long long mod_sub(long long a, long long b, long long mod = 1e9 + 7) {
+long long mod_sub(long long a, long long b) {
     return ((a % mod - b % mod) % mod + mod) % mod;
 }
 
-long long mod_mul(long long a, long long b, long long mod = 1e9 + 7) {
+long long mod_mul(long long a, long long b) {
     return ((a % mod) * (b % mod)) % mod;
 }
 
-long long mod_div(long long a, long long b, long long mod = 1e9 + 7) {
-    return mod_mul(a, mod_inv(b, mod), mod);
+long long mod_div(long long a, long long b) {
+    return mod_mul(a, mod_inv(b));
 }
