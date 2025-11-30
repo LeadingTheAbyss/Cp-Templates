@@ -1,0 +1,24 @@
+// <------------------------------------Debugging Macros for Conditional Output during Development---------------------------------->
+#ifndef ONLINE_JUDGE
+    #define debug(x)        cerr << #x << " = " << (x) << "\n"
+    #define debug_pair(p)   cerr << #p << " = (" << (p).first << ", " << (p).second << ")\n"
+    #define debug_vec(v)    do {                                          \
+                             cerr << #v << " = [";                       \
+                             for (auto& _e : (v))                       \
+                                 cerr << _e << ", ";                      \
+                             cerr << "]\n";                              \
+                          } while (0)
+    #define debug_map(m)    do {                                          \
+                             cerr << #m << " = {";                       \
+                             for (auto& _kv : (m))                      \
+                                 cerr << "(" << _kv.first                \
+                                      << ":" << _kv.second << "), ";      \
+                             cerr << "}\n";                              \
+                          } while (0)
+#else
+    #define debug(x)        do {} while (0)
+    #define debug_pair(p)   do {} while (0)
+    #define debug_vec(v)    do {} while (0)
+    #define debug_map(m)    do {} while (0)
+#endif
+// <------------------------------------------------------Debugging ends --------------------------------------------------------->
