@@ -1,0 +1,94 @@
+// Disjoint Set Union (Union - Find)
+// Helps join two groups and find the parent (representative) of a group fast.
+class DSU {
+    vector<int> parent, size, rank;
+
+public:
+    DSU(int n) {
+        for(int i = 0; i < n + 1; i++) {
+            size.push_back(1);
+            parent.push_back(i);
+            rank.push_back(0);
+        }
+    }
+
+    // Finds the parent of this node using path compression.
+    // Amortized Time : O(α(n)) ≈ O(1)
+    int findParent(int node) {
+        if (parent[node] == node) {
+            return node;
+        }
+        return parent[node] = findParent(parent[node]);
+    }
+
+    // Join two groups using size (attach smaller group to bigger group).
+    // Amortized Time : O(α(n)) ≈ O(1)
+    void unionSize(int u, int v) {
+        int pu = findParent(u);
+        int pv = findParent(v);
+
+        if (pu == pv) return;
+
+        if (size[pu] < size[pv]) {
+            parent[pu] = pv;
+            size[pv] += size[pu];
+        } else {
+            parent[pv] = pu;
+            size[pu] += size[pv];
+        }
+    }
+
+    // Join two groups using rank.
+    // Amortized Time : O(α(n)) ≈ O(1)
+    void unionRank(int u, int v) {
+        int pu = findParent(u);
+        int pv = findParent(v);
+
+        if (pu == pv) return;
+
+        if (rank[pu] == rank[pv]) {
+            parent[pu] = pv;
+            rank[pu]++;
+        }
+        else if (rank[pu] < rank[pv]) {
+            parent[pu] = pv;
+        }
+        else {
+            parent[pv] = pu;
+        }
+    }
+
+    // To find the size of the component of any vertex u, use its parent not the vertex u itself.
+    int findSize(int n) {
+        return size[n];
+    }
+};
+
+
+// Kruskal's Minimum Spanning Tree
+// edges format: vector<vector<int>> edges -> {u, v, weight}
+// Convert all long doubles to int if you want answer without floating points
+vector<vector<int>> mstEdges;
+
+int kruskalMST(int vertexCount, vector<vector<int>> &edges) {
+    sort(edges.begin(), edges.end(), [](const vector<int> &a, const vector<int> &b) {
+        return a[2] < b[2];
+    });
+
+    DSU dsu(vertexCount);
+    int totalWeight = 0;
+    mstEdges.clear();
+
+    int usedEdges = 0;
+    for (auto &e : edges) {
+        int u = e[0], v = e[1], w = e[2];
+        if (dsu.findParent(u) != dsu.findParent(v)) {
+            dsu.unionSize(u, v);
+            totalWeight += w;
+            mstEdges.push_back(e);
+            if (++usedEdges == vertexCount - 1) break;
+        }
+    }
+
+    return totalWeight;
+}
