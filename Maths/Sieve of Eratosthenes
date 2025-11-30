@@ -1,0 +1,13 @@
+// To find the primes from [2, n]
+// Time Complexity : O(n log (log n))
+vector<bool> SieveOfEratosthenes(long long n) {
+    vector<bool> prime(n + 1, true);
+    prime[0] = prime[1] = false;
+    for (long long p = 2; p * p <= n; ++p) {
+        if (prime[p]) {
+            for (long long i = p * p; i <= n; i += p)
+                prime[i] = false;
+        }
+    }
+    return prime;
+}
