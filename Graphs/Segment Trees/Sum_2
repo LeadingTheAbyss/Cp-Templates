@@ -1,0 +1,87 @@
+class SegmentTree_Sum {
+public:
+    int n;
+    vector<long long> tree, lazy_add, lazy_set;
+    vector<bool> has_set;
+
+    SegmentTree_Sum(int n) : n(n) {
+        tree.assign(4 * n, 0);
+        lazy_add.assign(4 * n, 0);
+        lazy_set.assign(4 * n, 0);
+        has_set.assign(4 * n, false);
+    }
+
+    void build(const vector<long long> &a, int node, int start, int end) {
+        if (start == end) {
+            tree[node] = a[start];
+            return;
+        }
+        int mid = (start + end) / 2;
+        build(a, node * 2, start, mid);
+        build(a, node * 2 + 1, mid + 1, end);
+        tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    }
+
+    void apply_add(int node, int start, int end, long long val) {
+        if (has_set[node]) lazy_set[node] += val;
+        else lazy_add[node] += val;
+        tree[node] += 1LL * (end - start + 1) * val;
+    }
+
+    void apply_set(int node, int start, int end, long long val) {
+        tree[node] = 1LL * (end - start + 1) * val;
+        lazy_set[node] = val;
+        lazy_add[node] = 0;
+        has_set[node] = true;
+    }
+
+    void push(int node, int start, int end) {
+        if (start == end) return;
+        int mid = (start + end) / 2;
+        if (has_set[node]) {
+            apply_set(node * 2, start, mid, lazy_set[node]);
+            apply_set(node * 2 + 1, mid + 1, end, lazy_set[node]);
+            has_set[node] = false;
+        }
+        if (lazy_add[node] != 0) {
+            apply_add(node * 2, start, mid, lazy_add[node]);
+            apply_add(node * 2 + 1, mid + 1, end, lazy_add[node]);
+            lazy_add[node] = 0;
+        }
+    }
+
+    void updateAdd(int node, int start, int end, int l, int r, long long val) {
+        if (r < start || end < l) return;
+        if (l <= start && end <= r) {
+            apply_add(node, start, end, val);
+            return;
+        }
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        updateAdd(node * 2, start, mid, l, r, val);
+        updateAdd(node * 2 + 1, mid + 1, end, l, r, val);
+        tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    }
+
+    void updateSet(int node, int start, int end, int l, int r, long long val) {
+        if (r < start || end < l) return;
+        if (l <= start && end <= r) {
+            apply_set(node, start, end, val);
+            return;
+        }
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        updateSet(node * 2, start, mid, l, r, val);
+        updateSet(node * 2 + 1, mid + 1, end, l, r, val);
+        tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    }
+
+    long long queryRange(int node, int start, int end, int l, int r) {
+        if (r < start || end < l) return 0;
+        if (l <= start && end <= r) return tree[node];
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        return queryRange(node * 2, start, mid, l, r)
+             + queryRange(node * 2 + 1, mid + 1, end, l, r);
+    }
+};
