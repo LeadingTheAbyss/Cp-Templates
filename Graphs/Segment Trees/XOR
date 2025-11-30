@@ -1,0 +1,45 @@
+class SegmentTree_XOR {
+public:
+    int n;
+    vector<long long> tree;
+
+    SegmentTree_XOR(int n) : n(n) {
+        tree.assign(4 * n, 0);
+    }
+
+    // Build the tree from an array
+    // Time Complexity: O(n)
+    void build(const vector<long long> &a, int node, int start, int end) {
+        if (start == end) {
+            tree[node] = a[start];
+            return;
+        }
+        int mid = (start + end) / 2;
+        build(a, node * 2, start, mid);
+        build(a, node * 2 + 1, mid + 1, end);
+        tree[node] = tree[node * 2] ^ tree[node * 2 + 1];
+    }
+
+    // Point update: set position idx to val
+    // Time Complexity: O(log n)
+    void update(int node, int start, int end, int idx, long long val) {
+        if (start == end) {
+            tree[node] = val;
+            return;
+        }
+        int mid = (start + end) / 2;
+        if (idx <= mid) update(node * 2, start, mid, idx, val);
+        else update(node * 2 + 1, mid + 1, end, idx, val);
+        tree[node] = tree[node * 2] ^ tree[node * 2 + 1];
+    }
+
+    // Query XOR in range [l, r]
+    // Time Complexity: O(log n)
+    long long query(int node, int start, int end, int l, int r) {
+        if (l > r) return 0;
+        if (l == start && r == end) return tree[node];
+        int mid = (start + end) / 2;
+        return query(node * 2, start, mid, l, min(r, mid))
+             ^ query(node * 2 + 1, mid + 1, end, max(l, mid + 1), r);
+    }
+};
