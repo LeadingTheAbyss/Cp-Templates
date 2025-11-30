@@ -1,0 +1,35 @@
+// Custom hash function
+struct custom_hash {
+    static uint64_t splitmix64(uint64_t x) noexcept {
+        x += 0x9e3779b97f4a7c15ULL;
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+        x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+        return x ^ (x >> 31);
+    }
+
+    // base uint64_t entrypoint
+    size_t operator()(uint64_t x) const noexcept {
+        static const uint64_t FIXED_RANDOM =
+            chrono::steady_clock::now().time_since_epoch().count();
+        return (size_t)splitmix64(x + FIXED_RANDOM);
+    }
+
+    // generic fallback for types that have std::hash<T>
+    template<typename T>
+    size_t operator()(const T &x) const noexcept {
+        return (*this)(static_cast<uint64_t>(std::hash<T>{}(x)));
+    }
+
+    // pair<K,V> overload (so pair<int,int> works even though std::hash<pair<..>> is not standard)
+    template<typename A, typename B>
+    size_t operator()(const pair<A,B> &p) const noexcept {
+        uint64_t h1 = uint64_t(std::hash<A>{}(p.first));
+        uint64_t h2 = uint64_t(std::hash<B>{}(p.second));
+        // combine like boost::hash_combine, then feed to splitmix
+        uint64_t combined = h1 ^ (h2 + 0x9e3779b97f4a7c15ULL + (h1<<6) + (h1>>2));
+        return (*this)(combined);
+    }
+};
+
+template<typename K, typename V>
+using umap = unordered_map<K, V, custom_hash>;
