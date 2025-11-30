@@ -1,0 +1,66 @@
+class SegmentTree_Sum {
+public:
+    int n;
+    vector<long long> tree, lazy;
+
+    SegmentTree_Sum(int n) : n(n) {
+        tree.assign(4 * n, 0);
+        lazy.assign(4 * n, 0);
+    }
+
+    // For building the tree from an array 
+    // Time Complexity: O(n)
+    void build(const vector<long long> &a, int node, int start, int end) {
+        if (start == end) {
+            tree[node] = a[start];
+            return;
+        }
+        int mid = (start + end) / 2;
+        build(a, node * 2, start, mid);
+        build(a, node * 2 + 1, mid + 1, end);
+        tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    }
+
+    // Used for applying a lazy update to a node
+    // Time Complexity: O(1)
+    void apply(int node, int start, int end, long long val) {
+        tree[node] += 1LL * (end - start + 1) * val;
+        lazy[node] += val;
+    }
+
+    // Used for pushing pending lazy updates to children
+    // Time Complexity: O(1)
+    void push(int node, int start, int end) {
+        if (lazy[node] == 0) return;
+        int mid = (start + end) / 2;
+        apply(node * 2, start, mid, lazy[node]);
+        apply(node * 2 + 1, mid + 1, end, lazy[node]);
+        lazy[node] = 0;
+    }
+
+    // Used for updating range [l, r] by adding val
+    // Time Complexity: O(log n)
+    void updateRange(int node, int start, int end, int l, int r, long long val) {
+        if (l > r) return;
+        if (l == start && r == end) {
+            apply(node, start, end, val);
+            return;
+        }
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        updateRange(node * 2, start, mid, l, min(r, mid), val);
+        updateRange(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, val);
+        tree[node] = tree[node * 2] + tree[node * 2 + 1];
+    }
+
+    // Used for finding Range Sum in [l, r]
+    // Time Complexity: O(log n)
+    long long query(int node, int start, int end, int l, int r) {
+        if (l > r) return 0;
+        if (l == start && r == end) return tree[node];
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        return query(node * 2, start, mid, l, min(r, mid))
+             + query(node * 2 + 1, mid + 1, end, max(l, mid + 1), r);
+    }
+};
