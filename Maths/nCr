@@ -1,31 +1,15 @@
-// Change this to Mint if you need to return answer modulo mod
-using Type = long long;  
-
-const int max_val = 2e5 + 5;
-vector<Type> fact(max_val), invfact(max_val);
-
-// Inverse function
-Type inv(Type x) {
-    if constexpr (is_same<Type, long long>::value) {
-        return 1 / x;  // normal division
-    } else {
-        return inv(x);  // Mint's inverse
-    }
-}
-
-// Precomputation for factorials and inverse factorials
-void precompute_combinations() {
-    fact[0] = 1;
-    for (int i = 1; i < max_val; i++)
-        fact[i] = fact[i - 1] * i;
-    
-    invfact[max_val - 1] = inv(fact[max_val - 1]);
-    for (int i = max_val - 2; i >= 0; i--)
-        invfact[i] = invfact[i + 1] * (i + 1);
-}
-
-// nCr function
-Type nCr(Type n, Type r) {
-    if (r < 0 || r > n) return 0;
-    return fact[n] * invfact[r] * invfact[n - r];
-}
+"To find the nCr": {
+  "prefix": "nCr",
+  "body": [
+    "nCr function",
+    "Time Complexity : O(r)",
+    "long long nCr(int n, int r) {",
+    "    long long res = 1;",
+    "    for (int i = 0; i < r; i++) {",
+    "        res *= (n - i);",
+    "        res /= (i + 1);",
+    "    }",
+    "    return res;",
+    "}",
+  ],
+},
