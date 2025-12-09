@@ -1,8 +1,8 @@
 "To find the nCr": {
   "prefix": "nCr",
   "body": [
-    "nCr function",
-    "Time Complexity : O(r)",
+    "// nCr function",
+    "// Time Complexity : O(r)",
     "long long nCr(int n, int r) {",
     "    long long res = 1;",
     "    for (int i = 0; i < r; i++) {",
