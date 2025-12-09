@@ -1,43 +1,37 @@
-"Precomputing nCr when I need to return modulo mod answer": {
-  "prefix": "precompute_nCr",
-  "body": [
-    "vector<Mint> fact, invfact;",
-    "int fact_computed = 0;",
-    "",
-    "// Precomputing factorials up to n",
-    "void precompute(int n) {",
-    "    if (n <= fact_computed) return; ",
-    "    fact.assign(n + 1, Mint(0));",
-    "    invfact.assign(n + 1, Mint(0));",
-    "    ",
-    "    fact[0] = Mint(1);",
-    "    for (int i = 1; i <= n; i++) {",
-    "        fact[i] = fact[i - 1] * Mint(i);",
-    "    }",
-    "",
-    "    invfact[n] = inv(fact[n]);",
-    "    for (int i = n - 1; i >= 0; i--) {",
-    "        invfact[i] = invfact[i + 1] * Mint(i + 1);",
-    "    }",
-    "    fact_computed = n;",
-    "}",
-    "",
-    "// nCr function ",
-    "Mint nCr(long long n, long long r) {",
-    "    if (r < 0 || r > n) return Mint(0);",
-    "    if (n > fact_computed) precompute(n);",
-    "    return fact[n] * invfact[r] * invfact[n - r];",
-    "}"
-    "",
-    "// Multinomial Coefficient :",
-    "// Computes x! / (y1! * y2! * ... * ym!) % mod",
-    "Mint multi(int x, const vector<int> &y) {",
-    "    Mint res = fact[x];",
-    "    for (int p : y) {",
-    "        res = res * invfact[p];",
-    "    }",
-    "    return res;",
-    "}"
-  ],
-  "description": "Precomputing nCr when I need to return modulo mod answer"
+vector<Mint> fact, invfact;
+int fact_computed = 0;
+
+// Precomputing factorials up to n
+void precompute(int n) {
+    if (n <= fact_computed) return; 
+    fact.assign(n + 1, Mint(0));
+    invfact.assign(n + 1, Mint(0));
+    
+    fact[0] = Mint(1);
+    for (int i = 1; i <= n; i++) {
+        fact[i] = fact[i - 1] * Mint(i);
+    }
+
+    invfact[n] = inv(fact[n]);
+    for (int i = n - 1; i >= 0; i--) {
+        invfact[i] = invfact[i + 1] * Mint(i + 1);
+    }
+    fact_computed = n;
+}
+
+// nCr function 
+Mint nCr(long long n, long long r) {
+    if (r < 0 || r > n) return Mint(0);
+    if (n > fact_computed) precompute(n);
+    return fact[n] * invfact[r] * invfact[n - r];
+}
+
+// Multinomial Coefficient :
+// Computes x! / (y1! * y2! * ... * ym!) % mod
+Mint multi(int x, const vector<int> &y) {
+    Mint res = fact[x];
+    for (int p : y) {
+        res = res * invfact[p];
+    }
+    return res;
 }
