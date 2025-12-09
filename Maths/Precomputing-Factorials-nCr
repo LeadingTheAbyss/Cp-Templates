@@ -28,6 +28,16 @@
     "    if (n > fact_computed) precompute(n);",
     "    return fact[n] * invfact[r] * invfact[n - r];",
     "}"
+    "",
+    "// Multinomial Coefficient :",
+    "// Computes x! / (y1! * y2! * ... * ym!) % mod",
+    "Mint multi(int x, const vector<int> &y) {",
+    "    Mint res = fact[x];",
+    "    for (int p : y) {",
+    "        res = res * invfact[p];",
+    "    }",
+    "    return res;",
+    "}"
   ],
   "description": "Precomputing nCr when I need to return modulo mod answer"
 }
