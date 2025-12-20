@@ -1,7 +1,7 @@
 // Disjoint Set Union (Union - Find)
 // Helps join two groups and find the parent (representative) of a group fast.
 class DSU {
-    vector<int> parent, size, rank;
+    vector<int> parent, size, rank, maxElement, minElement;
 
 public:
     DSU(int n) {
@@ -9,6 +9,8 @@ public:
             size.push_back(1);
             parent.push_back(i);
             rank.push_back(0);
+            maxElement.push_back(i);
+            minElement.push_back(i);
         }
     }
 
@@ -27,12 +29,17 @@ public:
         int pu = findParent(u);
         int pv = findParent(v);
 
+        
         if (pu == pv) return;
-
+        
         if (size[pu] < size[pv]) {
             parent[pu] = pv;
+            maxElement[pv] = max(maxElement[pu], maxElement[pv]);
+            minElement[pv] = min(minElement[pu], minElement[pv]);
             size[pv] += size[pu];
         } else {
+            maxElement[pu] = max(maxElement[pu], maxElement[pv]);
+            minElement[pu] = min(minElement[pu], minElement[pv]);
             parent[pv] = pu;
             size[pu] += size[pv];
         }
@@ -61,5 +68,11 @@ public:
     // To find the size of the component of any vertex u, use its parent not the vertex u itself.
     int findSize(int n) {
         return size[n];
+    }
+    int findMax(int n) {
+        return maxElement[n];
+    }
+    int findMin(int n) {
+        return minElement[n];
     }
 };
