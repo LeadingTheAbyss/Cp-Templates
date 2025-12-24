@@ -65,9 +65,20 @@ public:
 };
 
 
-// Kruskal's Minimum Spanning Tree
-// edges format: vector<vector<int>> edges -> {u, v, weight}
-// Convert all long doubles to int if you want answer without floating points
+/*
+Kruskal's Minimum Spanning Tree Using DSU
+For the edges vector : Create a vector<vector<int>> and just push back 
+{Source, Destination, Weight} for every edge given between two vertices.
+Example :
+    vector<vector<int>> edges;
+    for (...) {
+        int u, v, w; 
+        cin >> u >> v >> w; 
+        edges.push_back({u, v, w})
+    }
+        
+Convert all long doubles to int if you want answer without floating points
+*/
 vector<vector<int>> mstEdges;
 
 int kruskalMST(int vertexCount, vector<vector<int>> &edges) {
