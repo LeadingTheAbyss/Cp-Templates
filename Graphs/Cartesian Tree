@@ -1,0 +1,82 @@
+class CartesianTree {
+public:
+    int n, root;
+    vector<int> l, r; // nearest greater on left/right
+    vector<array<int,2>> adj; // adj[u][0] = left child, adj[u][1] = right child
+    vector<vector<int>> up; // binary lifting table for LCA
+    vector<int> depth;                      
+
+    CartesianTree(const vector<int> &a) : n(a.size()), l(n), r(n), adj(n, {-1,-1}), depth(n) {
+        buildTree(a); // O(n)
+        prepareLCA(); // O(n log n)
+    }
+
+private:
+    // Build the tree using nearest greater element method
+    // Time Complexity: O(n)
+    void buildTree(const vector<int> &a) {
+        for (int i = 0; i < n; i++) {
+            l[i] = i - 1;
+            while (l[i] >= 0 && a[l[i]] <= a[i]) l[i] = l[l[i]];
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            r[i] = i + 1;
+            while (r[i] < n && a[r[i]] < a[i]) r[i] = r[r[i]];
+        }
+        for (int i = 0; i < n; i++) {
+            if (l[i] == -1 && r[i] == n) {
+                root = i;
+            } else if (l[i] == -1) {
+                adj[r[i]][0] = i;
+            } else if (r[i] == n) {
+                adj[l[i]][1] = i;
+            } else if (a[l[i]] <= a[r[i]]) {
+                adj[l[i]][1] = i;
+            } else {
+                adj[r[i]][0] = i;
+            }
+        }
+    }
+
+    // DFS to compute depth and 2^k ancestors for LCA
+    // Time Complexity: O(n log n)
+    void dfs(int u, int p) {
+        up[u][0] = p;
+        for (int k = 1; k < (int)up[u].size(); k++) {
+            if (up[u][k-1] != -1) up[u][k] = up[up[u][k-1]][k-1];
+        }
+        for (int c : adj[u]) {
+            if (c != -1) {
+                depth[c] = depth[u] + 1;
+                dfs(c, u);
+            }
+        }
+    }
+
+    // Prepare binary lifting table for LCA queries
+    // Time Complexity: O(n log n)
+    void prepareLCA() {
+        int LOG = 20; // enough for n <= 1e6
+        up.assign(n, vector<int>(LOG, -1));
+        depth[root] = 0;
+        dfs(root, -1);
+    }
+
+public:
+    // Compute LCA of nodes u and v
+    // Time Complexity: O(log n)
+    int getLCA(int u, int v) {
+        if (depth[u] < depth[v]) swap(u,v);
+        int LOG = up[0].size();
+        for (int k = LOG-1; k >= 0; k--) {
+            if (up[u][k] != -1 && depth[up[u][k]] >= depth[v]) u = up[u][k];
+        }
+        if (u == v) return u;
+        for (int k = LOG-1; k >= 0; k--) {
+            if (up[u][k] != -1 && up[u][k] != up[v][k]) {
+                u = up[u][k]; v = up[v][k];
+            }
+        }
+        return up[u][0];
+    }
+};
