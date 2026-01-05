@@ -1,0 +1,60 @@
+class Trie {
+public:
+    struct Node {
+        Node* child[2];  // For binary trie (0 and 1)
+        bool isEnd;      // Optional, to mark end of a number
+
+        Node() {
+            child[0] = child[1] = nullptr;
+            isEnd = false;
+        }
+    };
+
+    Node* root;
+
+    Trie() {
+        root = new Node();
+    }
+
+    // Insert a number into the trie
+    // Time Complexity: O(LOG)
+    void insert(int num, int LOG = 31) {
+        Node* node = root;
+        for (int i = LOG; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!node->child[bit])
+                node->child[bit] = new Node();
+            node = node->child[bit];
+        }
+        node->isEnd = true;
+    }
+
+    // Check if a number exists in the trie
+    // Time Complexity: O(LOG)
+    bool search(int num, int LOG = 31) {
+        Node* node = root;
+        for (int i = LOG; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!node->child[bit]) return false;
+            node = node->child[bit];
+        }
+        return node->isEnd;
+    }
+
+    // Find maximum XOR with a given number
+    // Time Complexity: O(LOG)
+    int maxXOR(int num, int LOG = 31) {
+        Node* node = root;
+        int res = 0;
+        for (int i = LOG; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (node->child[1 - bit]) {
+                res |= (1 << i);
+                node = node->child[1 - bit];
+            } else {
+                node = node->child[bit];
+            }
+        }
+        return res;
+    }
+};
