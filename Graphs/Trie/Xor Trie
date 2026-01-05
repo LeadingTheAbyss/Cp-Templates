@@ -1,4 +1,4 @@
-class Trie {
+class Trie_Xor {
 public:
     struct Node {
         Node* child[2];  // For binary trie (0 and 1)
@@ -12,7 +12,7 @@ public:
 
     Node* root;
 
-    Trie() {
+    Trie_Xor() {
         root = new Node();
     }
 
