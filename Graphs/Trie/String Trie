@@ -1,0 +1,55 @@
+class Trie_String {
+public:
+    struct Node {
+        Node* child[26];
+        bool isEnd;
+
+        Node() {
+            memset(child, 0, sizeof(child));
+            isEnd = false;
+        }
+    };
+
+    Node* root;
+
+    Trie_String() {
+        root = new Node();
+    }
+
+    // Insert a word
+    // Time: O(length)
+    void insert(const string& s) {
+        Node* node = root;
+        for (char c : s) {
+            int idx = c - 'a';
+            if (!node->child[idx])
+                node->child[idx] = new Node();
+            node = node->child[idx];
+        }
+        node->isEnd = true;
+    }
+
+    // Search exact word
+    // Time: O(length)
+    bool search(const string& s) {
+        Node* node = root;
+        for (char c : s) {
+            int idx = c - 'a';
+            if (!node->child[idx]) return false;
+            node = node->child[idx];
+        }
+        return node->isEnd;
+    }
+
+    // Check if any word starts with prefix
+    // Time: O(length)
+    bool startsWith(const string& prefix) {
+        Node* node = root;
+        for (char c : prefix) {
+            int idx = c - 'a';
+            if (!node->child[idx]) return false;
+            node = node->child[idx];
+        }
+        return true;
+    }
+};
