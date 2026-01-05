@@ -41,6 +41,25 @@ public:
         return node->isEnd;
     }
 
+    // Find minimum XOR with a given number
+    // Time Complexity: O(LOG)
+    int minXOR(int num, int LOG = 31) {
+        Node* node = root;
+        int res = 0;
+        for (int i = LOG; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            // Prefer SAME bit to minimize XOR
+            if (node->child[bit]) {
+                node = node->child[bit];
+            } else {
+                res |= (1 << i);
+                node = node->child[1 - bit];
+            }
+        }
+        return res;
+    }
+
+
     // Find maximum XOR with a given number
     // Time Complexity: O(LOG)
     int maxXOR(int num, int LOG = 31) {
