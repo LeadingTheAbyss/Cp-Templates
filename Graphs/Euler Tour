@@ -6,8 +6,7 @@ public:
     vector<vector<int>> adj;
     vector<int> tin, tout, flat;
 
-    EulerTour(int n) {
-        n = n;
+    EulerTour(int n) : n(n) {
         timer = 0;
         adj.assign(n + 1, {});
         tin.assign(n + 1, 0);
@@ -24,7 +23,7 @@ public:
     // DFS to flatten the tree
     // Time Complexity: O(n)
     void dfs(int u, int parent) {
-        tin[u] = timer++;
+        tin[u] = ++timer;
         flat[timer] = u;
 
         for (int v : adj[u]) {
