@@ -1,3 +1,5 @@
+// Segment Tree (Range Gcd)
+// Used to perform Range Gcd Queries and updates.
 class SegmentTree_GCD {
 public:
     int n;
