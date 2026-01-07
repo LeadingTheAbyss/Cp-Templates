@@ -1,3 +1,5 @@
+// Segment Tree (Range AND)
+// Used to perform Range AND Queries and updates.
 class SegmentTree_AND {
 public:
     int n;
