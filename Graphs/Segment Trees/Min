@@ -1,3 +1,5 @@
+// Segment Tree (Range Min)
+// Used to perform Range Min Queries and updates.
 class SegmentTree_Min {
 public:
     int n;
