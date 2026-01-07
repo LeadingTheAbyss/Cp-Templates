@@ -55,6 +55,13 @@ public:
         return idx + 1;
     }
 
+    // Point update
+    // Supports adding val to index i
+    // Time Complexity: O(log n)
+    void add(int i, long long val) {
+        update(i, val);
+    }
+
     // Range update
     // Supports adding val to range [l, r]
     // Time Complexity: O(log n)
