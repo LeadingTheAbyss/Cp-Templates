@@ -1,3 +1,5 @@
+// Segment Tree (Range XOR)
+// Used to perform Range XOR Queries and updates.
 class SegmentTree_XOR {
 public:
     int n;
