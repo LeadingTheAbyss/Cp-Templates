@@ -1,5 +1,5 @@
 // Segment Tree (Range Sum)
-// Used to perform Range Sum Queries, add updates using lazy propogation.
+// Used to perform Range Sum Queries, range add updates using lazy propogation.
 class SegmentTree_Sum {
 public:
     int n;
