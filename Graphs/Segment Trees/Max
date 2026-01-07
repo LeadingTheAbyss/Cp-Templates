@@ -1,3 +1,5 @@
+// Segment Tree (Range Max)
+// Used to perform Range Max Queries and updates.
 class SegmentTree_Max {
 public:
     int n;
