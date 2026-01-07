@@ -1,0 +1,47 @@
+// Euler Tour Technique
+// Used for flattening a tree and finding the subtree for any node.
+class EulerTour {
+public:
+    int n, timer;
+    vector<vector<int>> adj;
+    vector<int> tin, tout, flat;
+
+    EulerTour(int n) {
+        n = n;
+        timer = 0;
+        adj.assign(n + 1, {});
+        tin.assign(n + 1, 0);
+        tout.assign(n + 1, 0);
+        flat.assign(n + 1, 0);
+    }
+
+    // Add undirected edge 
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // DFS to flatten the tree
+    // Time Complexity: O(n)
+    void dfs(int u, int parent) {
+        tin[u] = timer++;
+        flat[timer] = u;
+
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+            dfs(v, u);
+        }
+
+        tout[u] = timer;
+    }
+
+    // Call this once after building edges
+    void build(int root = 1) {
+        dfs(root, 0);
+    }
+
+    // Returns subtree range of node u
+    pair<int, int> subtree(int u) {
+        return {tin[u], tout[u]};
+    }
+};
