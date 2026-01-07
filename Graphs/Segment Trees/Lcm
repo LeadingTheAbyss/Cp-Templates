@@ -1,3 +1,5 @@
+// Segment Tree (Range Lcm)
+// Used to perform Range Lcm Queries and updates.
 class SegmentTree_LCM {
 public:
     int n;
