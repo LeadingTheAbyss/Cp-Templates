@@ -1,3 +1,5 @@
+// Segment Tree (Range OR)
+// Used to perform Range OR Queries and updates.
 class SegmentTree_OR {
 public:
     int n;
