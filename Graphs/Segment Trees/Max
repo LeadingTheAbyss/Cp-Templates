@@ -46,4 +46,14 @@ public:
             query(node * 2 + 1, mid + 1, end, max(l, mid + 1), r)
         );
     }
+
+    int first_greater(int idx, int l, int r, int x) {
+        if (tree[idx] < x) return -1;   
+        if (l == r) return l;
+
+        int mid = (l + r) / 2;
+        if (tree[2 * idx] >= x)
+            return first_greater(2 * idx, l, mid, x);
+        return first_greater(2 * idx + 1, mid + 1, r, x);
+    }
 };
