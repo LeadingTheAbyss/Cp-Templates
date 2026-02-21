@@ -1,0 +1,78 @@
+// Segment Tree (Maximum Subarray Sum)
+// Used to perform maximum subarray sum queries with point updates.
+class SegmentTree_MaxSubarray {
+public:
+    struct Node {
+        long long sum;   // Total sum of segment
+        long long pref;  // Maximum prefix sum
+        long long suff;  // Maximum suffix sum
+        long long ans;   // Maximum subarray sum
+
+        Node(long long val = -(long long)4e18) {
+            sum = pref = suff = ans = val;
+        }
+    };
+
+    int n;
+    vector<Node> tree;
+
+    SegmentTree_MaxSubarray(int n) : n(n) {
+        tree.assign(4 * n, Node());
+    }
+
+    // Used for merging two child nodes
+    // Time Complexity: O(1)
+    Node merge(Node left, Node right) {
+        if (left.sum == -(long long)4e18) return right;
+        if (right.sum == -(long long)4e18) return left;
+
+        Node res;
+        res.sum  = left.sum + right.sum;
+        res.pref = max(left.pref, left.sum + right.pref);
+        res.suff = max(right.suff, right.sum + left.suff);
+        res.ans  = max({left.ans, right.ans, left.suff + right.pref});
+        return res;
+    }
+
+    // For building the tree from an array
+    // Time Complexity: O(n)
+    void build(const vector<long long> &a, int node, int start, int end) {
+        if (start == end) {
+            tree[node] = Node(a[start]);
+            return;
+        }
+        int mid = (start + end) / 2;
+        build(a, node * 2, start, mid);
+        build(a, node * 2 + 1, mid + 1, end);
+        tree[node] = merge(tree[node * 2], tree[node * 2 + 1]);
+    }
+
+    // Used for point update: set index idx to val
+    // Time Complexity: O(log n)
+    void update(int node, int start, int end, int idx, long long val) {
+        if (start == end) {
+            tree[node] = Node(val);
+            return;
+        }
+        int mid = (start + end) / 2;
+        if (idx <= mid)
+            update(node * 2, start, mid, idx, val);
+        else
+            update(node * 2 + 1, mid + 1, end, idx, val);
+
+        tree[node] = merge(tree[node * 2], tree[node * 2 + 1]);
+    }
+
+    // Used for querying maximum subarray sum in range [l, r]
+    // Time Complexity: O(log n)
+    Node query(int node, int start, int end, int l, int r) {
+        if (l > r) return Node();
+        if (l == start && r == end)
+            return tree[node];
+
+        int mid = (start + end) / 2;
+        Node left  = query(node * 2, start, mid, l, min(r, mid));
+        Node right = query(node * 2 + 1, mid + 1, end, max(l, mid + 1), r);
+        return merge(left, right);
+    }
+};
