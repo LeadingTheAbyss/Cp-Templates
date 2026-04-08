@@ -1,3 +1,4 @@
+```cpp
 class CartesianTree {
 public:
     int n, root;
