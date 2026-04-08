@@ -1,3 +1,4 @@
+```cpp
 // Disjoint Set Union (Union - Find)
 // Helps join two groups and find the parent (representative) of a group fast.
 class DSU {
@@ -76,3 +77,4 @@ public:
         return minElement[n];
     }
 };
+```
