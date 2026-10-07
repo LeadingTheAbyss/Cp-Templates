@@ -1,0 +1,277 @@
+/* 
+    Merge Sort Tree
+    
+    Used to perform range queries based on values, such as counting,
+    finding values, and calculating sums of smallest/largest elements.
+
+    Build Tree → O(n log n)
+    Count < x in [l, r] → O(log^2 n)
+    Count <= x in [l, r] → O(log^2 n)
+    Count > x in [l, r] → O(log^2 n)
+    Count >= x in [l, r] → O(log^2 n)
+    Count values in [x, y] → O(log^2 n)
+    Sum < x in [l, r] → O(log^2 n)
+    Sum <= x in [l, r] → O(log^2 n)
+    Sum > x in [l, r] → O(log^2 n)
+    Sum >= x in [l, r] → O(log^2 n)
+    Sum values in [x, y] → O(log^2 n)
+    Find minimum value >= x in [l, r] → O(log^2 n)
+    Find maximum value <= x in [l, r] → O(log^2 n)
+    K-th smallest in [l, r] → O(log(V) * log^2 n)
+    K-th largest in [l, r] → O(log(V) * log^2 n)
+    Sum of smallest k values in [l, r] → O(log(V) * log^2 n)
+    Sum of largest k values in [l, r] → O(log(V) * log^2 n)
+
+    V = value range. With coordinate compression, V <= n.
+    Standard Merge Sort Tree is mainly used for static arrays.
+    Point Update with vector nodes is expensive → O(n) worst case.
+*/
+
+class MergeSortTree {
+public:
+    struct Node {
+        vector<long long> val, pref;
+    };
+
+    int n;
+    vector<Node> tree;
+    long long mn = LLONG_MAX, mx = LLONG_MIN;
+    MergeSortTree(int n) : n(n) {
+        tree.resize(4 * n);
+    }
+
+
+    // For building the tree from an array    
+    // Each node stores a sorted array and its prefix sums
+    // Time Complexity: O(n log n)
+    void build(const vector<long long> &a, int node, int start, int end) {
+        if (start == end) {
+            tree[node].val = {a[start]};
+            tree[node].pref = {0, a[start]};
+            mn = min(mn, a[start]);
+            mx = max(mx, a[start]);
+            return;
+        }
+
+        int mid = (start + end) / 2;
+        build(a, node * 2, start, mid);
+        build(a, node * 2 + 1, mid + 1, end);
+        auto &v1 = tree[node * 2].val;
+        auto &v2 = tree[node * 2 + 1].val;
+        tree[node].val.resize(v1.size() + v2.size());
+        merge(v1.begin(), v1.end(), v2.begin(), v2.end(), tree[node].val.begin());
+        tree[node].pref.resize(tree[node].val.size() + 1);
+        for (int i = 0; i < tree[node].val.size(); i++) {
+            tree[node].pref[i + 1] = tree[node].pref[i] + tree[node].val[i];
+        }
+    }
+
+    // Used for getting the number of elements in this node <= x        
+    // Time Complexity: O(log n)
+    int countNodeLE(int node, long long x) {
+        return upper_bound(tree[node].val.begin(), tree[node].val.end(), x) - tree[node].val.begin();
+    }
+
+    // Used for getting the number of elements in this node < x        
+    // Time Complexity: O(log n)
+    int countNodeLT(int node, long long x) {
+        return lower_bound(tree[node].val.begin(), tree[node].val.end(), x) - tree[node].val.begin();
+    }
+
+    // Used for getting the sum of first k elements in this node
+    // Time Complexity: O(1)
+    long long sumFirstK(int node, int k) {
+        return tree[node].pref[k];
+    }
+
+    // Used for getting the sum of all elements in this node
+    // Time Complexity: O(1)
+    long long totalNodeSum(int node) {
+        return tree[node].pref.back();
+    }
+
+    // Used for counting elements <= x in [l, r]
+    // Time Complexity: O(log^2 n)
+    int queryLE(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return 0;
+        if (l == start && r == end) {
+            return countNodeLE(node, x);
+        }
+        int mid = (start + end) / 2;
+        return queryLE(node * 2, start, mid, l, min(r, mid), x) + queryLE(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, x);
+    }
+
+    // Used for counting elements < x in [l, r]
+    // Time Complexity: O(log^2 n)
+    int queryLT(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return 0;
+        if (l == start && r == end) {
+            return countNodeLT(node, x);
+        }
+        int mid = (start + end) / 2;
+        return queryLT(node * 2, start, mid, l, min(r, mid), x) + queryLT(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, x);
+    }
+    
+    // Used for counting elements > x in [l, r]
+    // Time Complexity: O(log^2 n)
+    int queryGT(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return 0;
+        int len = r - l + 1;
+        return len - queryLE(node, start, end, l, r, x);
+    }
+
+    // Used for counting elements >= x in [l, r]
+    // Time Complexity: O(log^2 n)
+    int queryGE(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return 0;
+        int len = r - l + 1;
+        return len - queryLT(node, start, end, l, r, x);
+    }
+
+    
+    // Used for counting elements in value range [x, y] in [l, r]
+    // Time Complexity: O(log^2 n)
+    int queryValueRange(int node, int start, int end, int l, int r, long long x, long long y) {
+        if (l > r) return 0;
+        return queryLE(node, start, end, l, r, y) - queryLT(node, start, end, l, r, x);
+    }
+
+    // Used for finding sum of elements <= x in [l, r]
+    // Time Complexity: O(log^2 n)
+    long long querySumLE(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return 0;
+        if (l == start && r == end) {
+            int k = countNodeLE(node, x);
+            return sumFirstK(node, k);
+        }
+        int mid = (start + end) / 2;
+        return querySumLE(node * 2, start, mid, l, min(r, mid), x) + querySumLE(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, x);
+    }
+
+    // Used for finding sum of elements < x in [l, r]
+    // Time Complexity: O(log^2 n)
+    long long querySumLT(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return 0;
+        if (l == start && r == end) {
+            int k = countNodeLT(node, x);
+            return sumFirstK(node, k);
+        }
+        int mid = (start + end) / 2;
+        return querySumLT(node * 2, start, mid, l, min(r, mid), x) + querySumLT(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, x);
+    }
+
+    // Used for finding total sum in [l, r]
+    // Time Complexity: O(log n)
+    long long querySum(int node, int start, int end, int l, int r) {
+        if (l > r) return 0;
+        if (l == start && r == end) {
+            return totalNodeSum(node);
+        }
+        int mid = (start + end) / 2;
+        return querySum(node * 2, start, mid, l, min(r, mid)) + querySum(node * 2 + 1, mid + 1, end, max(l, mid + 1), r);
+    }
+
+    // Used for finding sum of elements > x in [l, r]    
+    // Time Complexity: O(log^2 n)
+    long long querySumGT(int node, int start, int end, int l, int r, long long x) {
+        return querySum(node, start, end, l, r) - querySumLE(node, start, end, l, r, x);
+    }
+
+    // Used for finding sum of elements >= x in [l, r]
+    // Time Complexity: O(log^2 n)
+    long long querySumGE(int node, int start, int end, int l, int r, long long x) {
+        return querySum(node, start, end, l, r) - querySumLT(node, start, end, l, r, x);
+    }
+
+    // Used for finding sum of elements in value range [x, y]
+    // Time Complexity: O(log^2 n)
+    long long querySumRange(int node, int start, int end, int l, int r, long long x, long long y) {
+        return querySumLE(node, start, end, l, r, y) - querySumLT(node, start, end, l, r, x);
+    }
+
+    // Used for finding minimum value >= x in [l, r]
+    // Returns LLONG_MAX if no such value exists  
+    // Time Complexity: O(log^2 n)
+    long long queryMinGE(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return LLONG_MAX;
+        if (l == start && r == end) {
+            auto it = lower_bound(tree[node].val.begin(), tree[node].val.end(), x);
+            if (it == tree[node].val.end()) {
+                return LLONG_MAX;
+            }
+            return *it;
+        }
+
+        int mid = (start + end) / 2;
+        return min(queryMinGE(node * 2, start, mid, l, min(r, mid), x), queryMinGE(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, x));
+    }
+
+    // Used for finding maximum value <= x in [l, r]        
+    // Returns LLONG_MIN if no such value exists
+    // Time Complexity: O(log^2 n)
+    long long queryMaxLE(int node, int start, int end, int l, int r, long long x) {
+        if (l > r) return LLONG_MIN;
+        if (l == start && r == end) {
+            auto it = upper_bound(tree[node].val.begin(), tree[node].val.end(), x);
+            if (it == tree[node].val.begin()) {
+                return LLONG_MIN;
+            }
+            --it;
+            return *it;
+        }
+
+        int mid = (start + end) / 2;
+        return max(queryMaxLE(node * 2, start, mid, l, min(r, mid), x), queryMaxLE(node * 2 + 1, mid + 1, end, max(l, mid + 1), r, x));
+    }
+
+    // Used for finding the k-th smallest element in [l, r]
+    // k is 1-indexed
+    // Time Complexity: O(log(V) * log^2 n)
+    long long queryKthSmallest(int node, int start, int end, int l, int r, int k, long long low, long long high) {
+        if (low == high) {
+            return low;
+        }
+
+        long long mid = low + (high - low) / 2;
+        int cnt = queryLE(node, start, end, l, r, mid);
+        if (cnt >= k) {
+            return queryKthSmallest(node, start, end, l, r, k, low, mid);
+        }
+        return queryKthSmallest(node, start, end, l, r, k - cnt, mid + 1, high);
+    }
+
+    // Used for finding the k-th largest element in [l, r]
+    // k is 1-indexed
+    // Time Complexity: O(log(V) * log^2 n)
+    long long queryKthLargest(int node, int start, int end, int l, int r, int k, long long low, long long high) {
+        int len = r - l + 1;
+        return queryKthSmallest(node, start, end, l, r, len - k + 1, low, high);
+    }
+
+    // Used for finding the sum of the smallest k elements in [l, r]
+    // k can be from 0 to length of the range
+    // Time Complexity: O(log(V) * log^2 n)
+    long long querySumSmallestK(int node, int start, int end, int l, int r, int k, long long low, long long high) {
+        if (k == 0) return 0;
+        int len = r - l + 1;
+        if (k == len) {
+            return querySum(node, start, end, l, r);
+        }
+        long long x = queryKthSmallest(node, start, end, l, r, k, low, high);
+        long long sumLess = querySumLT(node, start, end, l, r, x);
+        int cntLess = queryLT(node, start, end, l, r, x);
+        return sumLess + 1LL * (k - cntLess) * x;
+    }
+
+    // Used for finding the sum of the largest k elements in [l, r]
+    // k can be from 0 to length of the range
+    // Time Complexity: O(log(V) * log^2 n)
+    long long querySumLargestK(int node, int start, int end, int l, int r, int k, long long low, long long high) {
+        if (k == 0) return 0;
+        int len = r - l + 1;
+        if (k == len) {
+            return querySum(node, start, end, l, r);
+        }
+        return querySum(node, start, end, l, r) - querySumSmallestK(node, start, end, l, r, len - k, low, high);
+    }
+};
