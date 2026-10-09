@@ -1,4 +1,4 @@
-vector<int> KMP(string s) {
+vector<int> kmp(string s) {
     int n = s.size();
     vector<int> pi(n);
     for (int i = 1; i < n; i++) {
