@@ -1,0 +1,96 @@
+class Rollback_DSU {
+    vector<int> parent, size, maxElement, minElement;
+    struct Change {
+        int parentRoot, childRoot;
+        int oldSize, oldMax, oldMin;
+    };
+
+    vector<Change> history;
+    vector<int> checkpoints;
+    int components;
+
+public:
+    Rollback_DSU(int n) {
+        components = n;
+        for (int i = 0; i <= n; i++) {
+            parent.push_back(i);
+            size.push_back(1);
+            maxElement.push_back(i);
+            minElement.push_back(i);
+        }
+    }
+
+    // Finds the representative without path compression.
+    // Time: O(log n), due to union by size.
+    int findParent(int node) {
+        if (parent[node] == node) {
+            return node;
+        }
+        return findParent(parent[node]);
+    }
+
+    // Joins two sets and saves the change for rollback.
+    // Time: O(log n).
+    void unionSize (int u, int v) {
+        int pu = findParent(u);
+        int pv = findParent(v);
+        if(pu == pv) {
+            return;
+        }
+
+        if(size[pu] < size[pv]) {
+            swap(pu, pv);
+        }
+
+        history.push_back({
+            pu, pv, size[pu],
+            maxElement[pu], minElement[pu]
+        });
+
+        parent[pv] = pu;
+        size[pu] += size[pv];
+        maxElement[pu] = max(maxElement[pu], maxElement[pv]);
+        minElement[pu] = min(minElement[pu], minElement[pv]);
+        components--;
+    }
+
+    // Saves a checkpoint of the current state.
+    // Time: O(1).
+    void persist() {
+        checkpoints.push_back(history.size());
+    }
+
+    // Undoes all successful unions since the latest checkpoint.
+    // Removes that checkpoint afterward.
+    void rollback() {
+        int snap = checkpoints.back();
+        checkpoints.pop_back();
+        while ((int)history.size() > snap) {
+            Change c = history.back();
+            history.pop_back();
+            parent[c.childRoot] = c.childRoot;
+            size[c.parentRoot] = c.oldSize;
+            maxElement[c.parentRoot] = c.oldMax;
+            minElement[c.parentRoot] = c.oldMin;
+            components++;
+        }
+    }
+
+    // Returns the current number of disjoint sets.
+    int countSets() {
+        return components;
+    }
+
+    // Component information for any vertex.
+    int findSize(int node) {
+        return size[findParent(node)];
+    }
+
+    int findMax(int node) {
+        return maxElement[findParent(node)];
+    }
+
+    int findMin(int node) {
+        return minElement[findParent(node)];
+    }
+};
