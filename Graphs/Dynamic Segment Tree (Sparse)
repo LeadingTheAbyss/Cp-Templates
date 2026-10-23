@@ -1,0 +1,167 @@
+/*
+ *    Dynamic Segment Tree (Range Sum)
+ *    Creates nodes only when needed, so it works for large coordinate ranges.
+*/
+
+class DynamicSegmentTree_Sum {
+public:
+    struct Node {
+        long long sum = 0;
+        long long setLazy = 0, addLazy = 0;
+        bool hasSet = false;
+        Node *left = nullptr, *right = nullptr;
+        bool flipLazy = false;
+    };
+
+    Node *root;
+    int n;
+
+    DynamicSegmentTree_Sum(int n) : n(n) {
+        root = new Node();
+    }
+
+    // Used for assigning every position in [start, end] to val
+    // Time Complexity: O(1)
+    void applySet(Node *node, int start, int end, long long val) {
+        node->sum = 1LL * (end - start + 1) * val;
+        node->setLazy = val;
+        node->addLazy = 0;
+        node->hasSet = true;
+        node->flipLazy = false;
+    }
+
+    // Used for adding val to every position in [start, end]
+    // Time Complexity: O(1)
+    void applyAdd(Node *node, int start, int end, long long val) {
+        node->sum += 1LL * (end - start + 1) * val;
+        if (node->hasSet) {
+            node->setLazy += val;
+        }
+        else {
+            if (node->flipLazy) node->addLazy -= val;
+            else node->addLazy += val;
+        }
+    }
+
+    // Used for pushing pending updates to children
+    // Time Complexity: O(1)
+    void push(Node *node, int start, int end) {
+        if (start == end) return;
+        if (!node->hasSet && node->addLazy == 0 && !node->flipLazy) return;
+        int mid = (start + end) / 2;
+        if (!node->left) node->left = new Node();
+        if (!node->right) node->right = new Node();
+        if (node->hasSet) {
+            applySet(node->left, start, mid, node->setLazy);
+            applySet(node->right, mid + 1, end, node->setLazy);
+        }
+        if (node->addLazy != 0) {
+            applyAdd(node->left, start, mid, node->addLazy);
+            applyAdd(node->right, mid + 1, end, node->addLazy);
+        }
+        if (node->flipLazy) {
+            applyFlip(node->left, start, mid);
+            applyFlip(node->right, mid + 1, end);
+        }
+        node->setLazy = 0;
+        node->addLazy = 0;
+        node->hasSet = false;
+        node->flipLazy = false;
+    }
+
+    // Used for assigning every position in [l, r] to val
+    // Time Complexity: O(log n)
+    void updateRange(Node *node, int start, int end, int l, int r, long long val) {
+        if (l > end || r < start || l > r) return;
+        if (l <= start && end <= r) {
+            applySet(node, start, end, val);
+            return;
+        }
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        if (l <= mid) {
+            if (!node->left) node->left = new Node();
+            updateRange(node->left, start, mid, l, r, val);
+        }
+        if (r > mid) {
+            if (!node->right) node->right = new Node();
+            updateRange(node->right, mid + 1, end, l, r, val);
+        }
+        node->sum = (node->left ? node->left->sum : 0) + (node->right ? node->right->sum : 0);
+    }
+
+    // Used for adding val to every position in [l, r]
+    // Time Complexity: O(log n)
+    void updateAdd(Node *node, int start, int end, int l, int r, long long val) {
+        if (l > end || r < start || l > r) return;
+        if (l <= start && end <= r) {
+            applyAdd(node, start, end, val);
+            return;
+        }
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        if (l <= mid) {
+            if (!node->left) node->left = new Node();
+            updateAdd(node->left, start, mid, l, r, val);
+        }
+        if (r > mid) {
+            if (!node->right) node->right = new Node();
+            updateAdd(node->right, mid + 1, end, l, r, val);
+        }
+        node->sum = (node->left ? node->left->sum : 0) + (node->right ? node->right->sum : 0);
+    }
+
+    // Used for finding Range Sum in [l, r]
+    // Time Complexity: O(log n)
+    long long query(Node *node, int start, int end, int l, int r) {
+        if (!node || l > end || r < start || l > r) return 0;
+        if (l <= start && end <= r) return node->sum;
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        return query(node->left, start, mid, l, r) + query(node->right, mid + 1, end, l, r);
+    }
+
+    void applyFlip(Node *node, int start, int end) {
+        node->sum = (end - start + 1) - node->sum;
+        if (node->hasSet) node->setLazy = 1 - node->setLazy;
+        else node->flipLazy ^= 1;
+    }
+
+    void updateFlip(Node *node, int start, int end, int l, int r) {
+        if (l > end || r < start || l > r) return;
+        if (l <= start && end <= r) {
+            applyFlip(node, start, end);
+            return;
+        }
+        push(node, start, end);
+        int mid = (start + end) / 2;
+        if (l <= mid) {
+            if (!node->left) node->left = new Node();
+            updateFlip(node->left, start, mid, l, r);
+        }
+        if (r > mid) {
+            if (!node->right) node->right = new Node();
+            updateFlip(node->right, mid + 1, end, l, r);
+        }
+        node->sum = (node->left ? node->left->sum : 0) + (node->right ? node->right->sum : 0);
+    }
+
+    // Wrapper functions
+    void updateRange(int l, int r, long long val) {
+        updateRange(root, 1, n, l, r, val);
+    }
+
+    void updateAdd(int l, int r, long long val) {
+        updateAdd(root, 1, n, l, r, val);
+    }
+
+    long long query(int l, int r) {
+        return query(root, 1, n, l, r);
+    }
+
+    // Used for flipping every position in [l, r]
+    // Time Complexity: O(log n)
+    void updateFlip(int l, int r) {
+        updateFlip(root, 1, n, l, r);
+    }
+};
